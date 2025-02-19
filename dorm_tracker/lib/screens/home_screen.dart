@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:dorm_tracker/models/dorm.dart';
 import 'package:dorm_tracker/screens/add_edit_dorm_screen.dart';
 import 'package:dorm_tracker/screens/dorm_detail_screen.dart';
+import 'package:dorm_tracker/database_helper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,24 +12,38 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  final List<Dorm> dorms = [];
+  List<Dorm> dorms = [];
 
-  void _addDorm(Dorm dorm) {
+  @override
+  void initState() {
+    super.initState();
+    _loadDorms();
+  }
+
+  // Load dorms from the database
+  Future<void> _loadDorms() async {
+    final fetchedDorms = await DatabaseHelper.instance.fetchDorms();
     setState(() {
-      dorms.add(dorm);
+      dorms = fetchedDorms;
     });
   }
 
-  void _editDorm(int index, Dorm dorm) {
-    setState(() {
-      dorms[index] = dorm;
-    });
+  // Add a new dorm to the database
+  Future<void> _addDorm(Dorm dorm) async {
+    await DatabaseHelper.instance.insertDorm(dorm);
+    _loadDorms(); // Reload dorms after adding
   }
 
-  void _deleteDorm(int index) {
-    setState(() {
-      dorms.removeAt(index);
-    });
+  // Edit a dorm's name in the database
+  Future<void> _editDorm(int index, Dorm dorm) async {
+    await DatabaseHelper.instance.updateDorm(dorm);
+    _loadDorms(); // Reload dorms after editing
+  }
+
+  // Delete a dorm from the database
+  Future<void> _deleteDorm(int index) async {
+    await DatabaseHelper.instance.deleteDorm(dorms[index].id!);
+    _loadDorms(); // Reload dorms after deleting
   }
 
   @override
@@ -51,7 +66,7 @@ class HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            if (dorms.isEmpty) 
+            if (dorms.isEmpty)
               Expanded(
                 child: Center(
                   child: Column(
@@ -135,19 +150,19 @@ class HomeScreenState extends State<HomeScreen> {
         ),
       ),
       floatingActionButton: dorms.isEmpty
-        ? null
-        : FloatingActionButton(
-            onPressed: () async {
-              final result = await showModalBottomSheet(
-                context: context,
-                builder: (context) => const AddEditDormScreen(),
-              );
-              if (result != null) {
-                _addDorm(result);
-              }
-            },
-            child: const Icon(Icons.add),
-          ),
+          ? null
+          : FloatingActionButton(
+              onPressed: () async {
+                final result = await showModalBottomSheet(
+                  context: context,
+                  builder: (context) => const AddEditDormScreen(),
+                );
+                if (result != null) {
+                  _addDorm(result);
+                }
+              },
+              child: const Icon(Icons.add),
+            ),
     );
   }
 }
