@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:dorm_tracker/screens/home_screen.dart';
 
 void main() {
-  runApp(DormTrackerApp());
+  runApp(const DormTrackerApp());
 }
 
 class DormTrackerApp extends StatelessWidget {
+  const DormTrackerApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -13,7 +15,7 @@ class DormTrackerApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      home: const HomeScreen(),
     );
   }
 }

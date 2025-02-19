@@ -3,11 +3,13 @@ import 'package:dorm_tracker/models/dorm.dart';
 import 'package:dorm_tracker/screens/add_edit_dorm_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  HomeScreenState createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> {
   List<Dorm> dorms = [];
 
   void _addDorm(Dorm dorm) {
@@ -32,14 +34,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('DormTracker'),
+        title: const Text('DormTracker'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
+            const Text(
               'Your Dorms:',
               style: TextStyle(
                 fontSize: 28,
@@ -47,14 +49,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 fontFamily: 'Roboto', // Use a nice font
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             if (dorms.isEmpty) 
               Expanded(
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
+                      const Text(
                         'There are no dorms yet. Please add a dorm.',
                         textAlign: TextAlign.center,
                         style: TextStyle(
@@ -63,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           fontFamily: 'Roboto',
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       FloatingActionButton(
                         onPressed: () async {
                           final result = await showModalBottomSheet(
@@ -111,8 +113,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   },
                 ),
               ),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Hold card to modify',
               style: TextStyle(
                 fontStyle: FontStyle.italic,
@@ -128,13 +130,13 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () async {
               final result = await showModalBottomSheet(
                 context: context,
-                builder: (context) => AddEditDormScreen(),
+                builder: (context) => const AddEditDormScreen(),
               );
               if (result != null) {
                 _addDorm(result);
               }
             },
-            child: Icon(Icons.add),
+            child: const Icon(Icons.add),
           ),
     );
   }

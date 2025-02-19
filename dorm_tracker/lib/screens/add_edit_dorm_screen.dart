@@ -5,13 +5,13 @@ class AddEditDormScreen extends StatefulWidget {
   final Dorm? dorm;
   final bool isEditing;
 
-  AddEditDormScreen({this.dorm, this.isEditing = false});
+  const AddEditDormScreen({super.key, this.dorm, this.isEditing = false});
 
   @override
-  _AddEditDormScreenState createState() => _AddEditDormScreenState();
+  AddEditDormScreenState createState() => AddEditDormScreenState();
 }
 
-class _AddEditDormScreenState extends State<AddEditDormScreen> {
+class AddEditDormScreenState extends State<AddEditDormScreen> {
   final _formKey = GlobalKey<FormState>();
   late String _name;
 
@@ -27,7 +27,7 @@ class _AddEditDormScreenState extends State<AddEditDormScreen> {
       padding: const EdgeInsets.all(16.0),
       child: Center(
         child: Container(
-          constraints: BoxConstraints(maxWidth: 400), // Optional: max width for larger screens
+          constraints: const BoxConstraints(maxWidth: 400), // Optional: max width for larger screens
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16.0),
@@ -36,7 +36,7 @@ class _AddEditDormScreenState extends State<AddEditDormScreen> {
                 color: Colors.black.withOpacity(0.2),
                 spreadRadius: 2,
                 blurRadius: 8,
-                offset: Offset(0, 3), // Shadow position
+                offset: const Offset(0, 3), // Shadow position
               ),
             ],
           ),
@@ -47,19 +47,19 @@ class _AddEditDormScreenState extends State<AddEditDormScreen> {
               children: [
                 Text(
                   widget.isEditing ? 'Edit Dorm' : 'Add Dorm',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                SizedBox(height: 20),
+                const SizedBox(height: 20),
                 Form(
                   key: _formKey,
                   child: Column(
                     children: [
                       TextFormField(
                         initialValue: _name,
-                        decoration: InputDecoration(labelText: 'Dorm Name'),
+                        decoration: const InputDecoration(labelText: 'Dorm Name'),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
                             return 'Please enter a name';
@@ -70,7 +70,7 @@ class _AddEditDormScreenState extends State<AddEditDormScreen> {
                           _name = value!;
                         },
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -84,16 +84,16 @@ class _AddEditDormScreenState extends State<AddEditDormScreen> {
                             child: Text(widget.isEditing ? 'Save' : 'Add'),
                           ),
                           if (widget.isEditing)
-                            SizedBox(width: 10),
+                            const SizedBox(width: 10),
                           if (widget.isEditing)
                             ElevatedButton(
                               onPressed: () {
                                 Navigator.of(context).pop('delete');
-                              },
-                              child: Text('Delete'),
+                              },                              
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                               ),
+                              child: const Text('Delete'),
                             ),
                         ],
                       ),
