@@ -30,20 +30,76 @@ class HomeScreenState extends State<HomeScreen> {
 
   // Add a new dorm to the database
   Future<void> _addDorm(Dorm dorm) async {
-    await DatabaseHelper.instance.insertDorm(dorm);
-    _loadDorms(); // Reload dorms after adding
+    try {
+      // Try to add the dorm to the database
+      await DatabaseHelper.instance.insertDorm(dorm);
+
+      // Reload the list of dorms after successfully adding the dorm
+      await _loadDorms();
+    } catch (e) {
+      // Handle error when dorm name already exists
+      if (e is Exception) {
+        String errorMessage = e.toString();
+
+        // Show warning SnackBar with amber color
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.amber, // Amber color for warning
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Handle unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred"),
+            backgroundColor: Colors.red, // Red background for errors
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   // Edit a dorm's name in the database
   Future<void> _editDorm(int index, Dorm dorm) async {
-    await DatabaseHelper.instance.updateDorm(dorm);
-    _loadDorms(); // Reload dorms after editing
+    try {
+      // Try to update the dorm in the database
+      await DatabaseHelper.instance.updateDorm(dorm);
+
+      // Reload the list of dorms after successfully editing the dorm
+      await _loadDorms();
+    } catch (e) {
+      // Handle error when dorm name already exists
+      if (e is Exception) {
+        String errorMessage = e.toString();
+
+        // Show warning SnackBar with amber color
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.amber, // Amber color for warning
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Handle unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred"),
+            backgroundColor: Colors.red, // Red background for errors
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   // Delete a dorm from the database
   Future<void> _deleteDorm(int index) async {
     await DatabaseHelper.instance.deleteDorm(dorms[index].id!);
-    _loadDorms(); // Reload dorms after deleting
+    await _loadDorms(); // Reload dorms after deleting
   }
 
   @override

@@ -34,19 +34,19 @@ class DormDetailScreenState extends State<DormDetailScreen> {
   // Add a new place to the database
   Future<void> _addPlace(String place) async {
     await DatabaseHelper.instance.insertPlace(widget.dorm.id!, place);
-    _loadPlaces(); // Reload the list of places
+    await _loadPlaces(); // Reload the list of places
   }
 
   // Edit an existing place in the database
   Future<void> _editPlace(int index, String newPlace) async {
     await DatabaseHelper.instance.updatePlace(widget.dorm.id!, places[index], newPlace);
-    _loadPlaces(); // Reload the list of places
+    await _loadPlaces(); // Reload the list of places
   }
 
   // Delete a place from the database
   Future<void> _deletePlace(int index) async {
     await DatabaseHelper.instance.deletePlace(widget.dorm.id!, places[index]);
-    _loadPlaces(); // Reload the list of places
+    await _loadPlaces(); // Reload the list of places
   }
 
   @override

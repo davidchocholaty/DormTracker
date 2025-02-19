@@ -56,9 +56,23 @@ class DatabaseHelper {
     ''');
   }
 
-  // Insert a dorm into the database
+  // Insert a dorm into the database, ensuring the dorm name is unique
   Future<int> insertDorm(Dorm dorm) async {
     final db = await database;
+
+    // Check if a dorm with the same name already exists
+    final existingDorm = await db.query(
+      'dorms',
+      where: 'name = ?',
+      whereArgs: [dorm.name],
+    );
+
+    // If a dorm with the same name already exists, throw an exception
+    if (existingDorm.isNotEmpty) {
+      throw Exception("A dorm with this name already exists.");
+    }
+
+    // If no duplicate is found, insert the new dorm
     return await db.insert('dorms', {'name': dorm.name});
   }
 
@@ -75,6 +89,39 @@ class DatabaseHelper {
     return dorms;
   }
 
+  // Update dorm name, ensuring the new name is unique
+  Future<int> updateDorm(Dorm dorm) async {
+    final db = await database;
+
+    // Check if a dorm with the same name already exists (excluding the dorm being updated)
+    final existingDorm = await db.query(
+      'dorms',
+      where: 'name = ? AND id != ?',
+      whereArgs: [dorm.name, dorm.id], // Check for other dorms with the same name
+    );
+
+    // If a dorm with the same name already exists, throw an exception
+    if (existingDorm.isNotEmpty) {
+      throw Exception("A dorm with this name already exists.");
+    }
+
+    // If no duplicate is found, update the dorm name
+    return await db.update(
+      'dorms',
+      {'name': dorm.name},
+      where: 'id = ?',
+      whereArgs: [dorm.id],
+    );
+  }
+
+  // Delete a dorm and all associated places
+  Future<int> deleteDorm(int dormId) async {
+    final db = await database;
+    // Delete places before deleting the dorm
+    await db.delete('places', where: 'dorm_id = ?', whereArgs: [dormId]);
+    return await db.delete('dorms', where: 'id = ?', whereArgs: [dormId]);
+  }
+
   // Insert a place for a specific dorm
   Future<int> insertPlace(int dormId, String place) async {
     final db = await database;
@@ -87,17 +134,6 @@ class DatabaseHelper {
     final placesData = await db.query('places', where: 'dorm_id = ?', whereArgs: [dormId]);
 
     return placesData.map((place) => place['name'] as String).toList();
-  }
-
-  // Update dorm name
-  Future<int> updateDorm(Dorm dorm) async {
-    final db = await database;
-    return await db.update(
-      'dorms',
-      {'name': dorm.name},
-      where: 'id = ?',
-      whereArgs: [dorm.id],
-    );
   }
 
   // Delete a place for a specific dorm
@@ -119,14 +155,6 @@ class DatabaseHelper {
       where: 'dorm_id = ? AND name = ?',
       whereArgs: [dormId, oldPlace],
     );
-  }
-
-  // Delete a dorm and all associated places
-  Future<int> deleteDorm(int dormId) async {
-    final db = await database;
-    // Delete places before deleting the dorm
-    await db.delete('places', where: 'dorm_id = ?', whereArgs: [dormId]);
-    return await db.delete('dorms', where: 'id = ?', whereArgs: [dormId]);
   }
 
   // Fetch items for a specific place
