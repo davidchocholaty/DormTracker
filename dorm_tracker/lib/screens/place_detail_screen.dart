@@ -214,65 +214,76 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
               )
             else
               Expanded(
-                child: ListView.builder(
-                  itemCount: items.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      child: ListTile(
-                        title: Text(items[index]['name']),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.remove),
-                              onPressed: (items[index]['count'] > 0) 
-                                ? () {
-                                    _updateItemCount(index, items[index]['count'] - 1);
-                                  } 
-                                : null, // Disable button when count is 0
-                            ),
-                            GestureDetector(
-                              onTap: () => _editItemCount(index), // Open manual edit dialog
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.blueAccent),
-                                  borderRadius: BorderRadius.circular(8),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: ListView.builder(
+                          itemCount: items.length,
+                          itemBuilder: (context, index) {
+                            return Card(
+                              child: ListTile(
+                                title: Text(items[index]['name']),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.remove),
+                                      onPressed: (items[index]['count'] > 0) 
+                                        ? () {
+                                            _updateItemCount(index, items[index]['count'] - 1);
+                                          } 
+                                        : null, // Disable button when count is 0
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => _editItemCount(index), // Open manual edit dialog
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                        decoration: BoxDecoration(
+                                          border: Border.all(color: Colors.blueAccent),
+                                          borderRadius: BorderRadius.circular(8),
+                                        ),
+                                        child: Text(
+                                          items[index]['count'].toString(),
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () => _updateItemCount(index, items[index]['count'] + 1),
+                                    ),
+                                  ],
                                 ),
-                                child: Text(
-                                  items[index]['count'].toString(),
-                                  style: const TextStyle(fontSize: 18),
-                                ),
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () => _updateItemCount(index, items[index]['count'] + 1),
-                            ),
-                          ],
-                        ),
-                        onLongPress: () async {
-                          final result = await showModalBottomSheet(
-                            context: context,
-                            builder: (context) => AddEditItemScreen(
-                              itemName: items[index]['name'],
-                              isEditing: true,
-                            ),
-                          );
+                                onLongPress: () async {
+                                  final result = await showModalBottomSheet(
+                                    context: context,
+                                    builder: (context) => AddEditItemScreen(
+                                      itemName: items[index]['name'],
+                                      isEditing: true,
+                                    ),
+                                  );
 
-                          if (result != null) {
-                            if (result == 'delete') {
-                              _deleteItem(index); // Delete item
-                            } else {
-                              _editItem(index, result); // Edit item
-                            }
-                          }
-                        },
+                                  if (result != null) {
+                                    if (result == 'delete') {
+                                      _deleteItem(index); // Delete item
+                                    } else {
+                                      _editItem(index, result); // Edit item
+                                    }
+                                  }
+                                },
+                              ),
+                            );
+                          },
+                        ),
                       ),
-                    );
-                  },
-                ),
-              ),
+                      const SizedBox(height: 20),
+                      const Text(
+                        'Tap to view details, hold to modify',
+                        style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                )
           ],
         ),
       ),

@@ -115,7 +115,7 @@ class DormDetailScreenState extends State<DormDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Dorm - ${widget.dorm.name}:',
+              'Places in ${widget.dorm.name}:',
               style: const TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
@@ -143,53 +143,59 @@ class DormDetailScreenState extends State<DormDetailScreen> {
               )
             else
               Expanded(
-                child: ListView.builder(
-                  itemCount: places.length,
-                  itemBuilder: (context, index) {
-                    final place = places[index];
-                    return GestureDetector(
-                      onLongPress: () async {
-                        final result = await showModalBottomSheet(
-                          context: context,
-                          builder: (context) => AddEditPlaceScreen(
-                            place: place.name,
-                            isEditing: true,
-                          ),
-                        );
-                        if (result != null) {
-                          if (result == 'delete') {
-                            _deletePlace(index);
-                          } else {
-                            _editPlace(index, result);
-                          }
-                        }
-                      },
-                      child: Card(
-                        child: ListTile(
-                          title: Text(place.name),
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => PlaceDetailScreen(
-                                  dormName: widget.dorm.name,
-                                  placeId: place.id,
-                                  placeName: place.name,
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: places.length,
+                        itemBuilder: (context, index) {
+                          final place = places[index];
+                          return GestureDetector(
+                            onLongPress: () async {
+                              final result = await showModalBottomSheet(
+                                context: context,
+                                builder: (context) => AddEditPlaceScreen(
+                                  place: place.name,
+                                  isEditing: true,
                                 ),
+                              );
+                              if (result != null) {
+                                if (result == 'delete') {
+                                  _deletePlace(index);
+                                } else {
+                                  _editPlace(index, result);
+                                }
+                              }
+                            },
+                            child: Card(
+                              child: ListTile(
+                                title: Text(place.name),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PlaceDetailScreen(
+                                        dormName: widget.dorm.name,
+                                        placeId: place.id,
+                                        placeName: place.name,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
-              ),
-            const SizedBox(height: 20),
-            const Text(
-              'Tap to view details, hold to modify',
-              style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-            ),
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Tap to view details, hold to modify',
+                      style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                    ),
+                    ],
+                  ),
+                )
           ],
         ),
       ),

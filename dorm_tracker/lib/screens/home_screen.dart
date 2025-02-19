@@ -191,52 +191,57 @@ class HomeScreenState extends State<HomeScreen> {
               )
             else
               Expanded(
-                child: ListView.builder(
-                  itemCount: dorms.length,
-                  itemBuilder: (context, index) {
-                    return GestureDetector(
-                      onLongPress: () async {
-                        final result = await showModalBottomSheet(
-                          context: context,
-                          builder: (context) => AddEditDormScreen(
-                            dorm: dorms[index],
-                            isEditing: true,
-                          ),
-                        );
-                        if (result != null) {
-                          if (result == 'delete') {
-                            _deleteDorm(index);
-                          } else {
-                            _editDorm(index, result);
-                          }
-                        }
-                      },
-                      child: Card(
-                        child: ListTile(
-                          title: Text(dorms[index].name),
-                          onTap: () {
-                            // Navigate to DormDetailScreen with the selected dorm
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => DormDetailScreen(dorm: dorms[index]),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: dorms.length,
+                        itemBuilder: (context, index) {
+                          return GestureDetector(
+                            onLongPress: () async {
+                              final result = await showModalBottomSheet(
+                                context: context,
+                                builder: (context) => AddEditDormScreen(
+                                  dorm: dorms[index],
+                                  isEditing: true,
+                                ),
+                              );
+                              if (result != null) {
+                                if (result == 'delete') {
+                                  _deleteDorm(index);
+                                } else {
+                                  _editDorm(index, result);
+                                }
+                              }
+                            },
+                            child: Card(
+                              child: ListTile(
+                                title: Text(dorms[index].name),
+                                onTap: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => DormDetailScreen(dorm: dorms[index]),
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Tap to view details, hold to modify',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-            const SizedBox(height: 20),
-            const Text(
-              'Tap to view details, hold to modify',
-              style: TextStyle(
-                fontStyle: FontStyle.italic,
-                color: Colors.grey,
-              ),
-            ),
+              )
           ],
         ),
       ),
