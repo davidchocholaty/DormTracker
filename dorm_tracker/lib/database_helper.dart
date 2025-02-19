@@ -43,6 +43,15 @@ class DatabaseHelper {
         FOREIGN KEY (dorm_id) REFERENCES dorms (id) ON DELETE CASCADE
       )
     ''');
+
+    await db.execute('''
+      CREATE TABLE items (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        placeName TEXT NOT NULL,
+        name TEXT NOT NULL,
+        count INTEGER DEFAULT 0
+      )
+    ''');
   }
 
   // Insert a dorm into the database
@@ -116,5 +125,47 @@ class DatabaseHelper {
     // Delete places before deleting the dorm
     await db.delete('places', where: 'dorm_id = ?', whereArgs: [dormId]);
     return await db.delete('dorms', where: 'id = ?', whereArgs: [dormId]);
+  }
+
+  // Fetch items for a specific place
+  Future<List<Map<String, dynamic>>> fetchItems(String placeName) async {
+    final db = await instance.database;
+    final result = await db.query(
+      'items',
+      where: 'placeName = ?',
+      whereArgs: [placeName],
+    );
+    return result;
+  }
+
+  // Insert new item with default count of 0
+  Future<void> insertItem(String placeName, String itemName, int count) async {
+    final db = await instance.database;
+    await db.insert(
+      'items',
+      {'placeName': placeName, 'name': itemName, 'count': count},
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  // Update item count
+  Future<void> updateItemCount(String placeName, String itemName, int newCount) async {
+    final db = await instance.database;
+    await db.update(
+      'items',
+      {'count': newCount},
+      where: 'placeName = ? AND name = ?',
+      whereArgs: [placeName, itemName],
+    );
+  }
+
+  // Delete an item
+  Future<void> deleteItem(String placeName, String itemName) async {
+    final db = await instance.database;
+    await db.delete(
+      'items',
+      where: 'placeName = ? AND name = ?',
+      whereArgs: [placeName, itemName],
+    );
   }
 }
