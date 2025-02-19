@@ -243,6 +243,41 @@ class DatabaseHelper {
     );
   }
 
+  // Update item name in the database
+  Future<void> updateItemName(String placeName, String oldItemName, String newItemName) async {
+    final db = await instance.database;
+
+    // Check if the item exists in the place (old name)
+    final existingItem = await db.query(
+      'items',
+      where: 'placeName = ? AND name = ?',
+      whereArgs: [placeName, oldItemName],
+    );
+
+    if (existingItem.isEmpty) {
+      throw Exception("The item to update doesn't exist.");
+    }
+
+    // Check if the new item name already exists in the same place
+    final duplicateItem = await db.query(
+      'items',
+      where: 'placeName = ? AND name = ?',
+      whereArgs: [placeName, newItemName],
+    );
+
+    if (duplicateItem.isNotEmpty) {
+      throw Exception("Item with this new name already exists.");
+    }
+
+    // Proceed with the update if checks pass
+    await db.update(
+      'items',
+      {'name': newItemName},
+      where: 'placeName = ? AND name = ?',
+      whereArgs: [placeName, oldItemName],
+    );
+  }
+
   // Delete an item
   Future<void> deleteItem(String placeName, String itemName) async {
     final db = await instance.database;

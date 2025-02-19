@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dorm_tracker/database_helper.dart';
+import 'package:dorm_tracker/screens/add_edit_item_screen.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final String dormName;
@@ -37,6 +38,42 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
       // Reload list after successfully adding the item
       await _loadItems();
+    } catch (e) {
+      // Handle error when item already exists
+      if (e is Exception) {
+        String errorMessage = e.toString();
+
+        // Show warning SnackBar with amber color
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.amber, // Amber color for warning
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Handle unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred"),
+            backgroundColor: Colors.red, // Red background for errors
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
+  }
+
+  // Edit an existing item in the database
+  Future<void> _editItem(int index, String newItemName) async {
+    try {
+      // Try to update the item name in the database (count stays the same)
+      await DatabaseHelper.instance.updateItemName(
+        widget.placeName,
+        items[index]['name'], // Original name
+        newItemName, // New name
+      );
+      await _loadItems(); // Reload the list of items after updating
     } catch (e) {
       // Handle error when item already exists
       if (e is Exception) {
@@ -171,28 +208,20 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           ],
                         ),
                         onLongPress: () async {
-                          bool? confirmDelete = await showDialog(
+                          final result = await showModalBottomSheet(
                             context: context,
-                            builder: (context) {
-                              return AlertDialog(
-                                title: const Text("Delete Item"),
-                                content: Text("Are you sure you want to delete this item?"),
-                                actions: [
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context, false),
-                                    child: const Text("Cancel"),
-                                  ),
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context, true),
-                                    child: const Text("Delete"),
-                                  ),
-                                ],
-                              );
-                            },
+                            builder: (context) => AddEditItemScreen(
+                              itemName: items[index]['name'],
+                              isEditing: true,
+                            ),
                           );
 
-                          if (confirmDelete == true) {
-                            _deleteItem(index);
+                          if (result != null) {
+                            if (result == 'delete') {
+                              _deleteItem(index); // Delete item
+                            } else {
+                              _editItem(index, result); // Edit item
+                            }
                           }
                         },
                       ),
