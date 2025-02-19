@@ -44,23 +44,27 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
       if (e is Exception) {
         String errorMessage = e.toString();
 
-        // Show warning SnackBar with amber color
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.amber, // Amber color for warning
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Show warning SnackBar with amber color
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.amber, // Amber color for warning
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       } else {
-        // Handle unexpected errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("An unexpected error occurred"),
-            backgroundColor: Colors.red, // Red background for errors
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Handle unexpected errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("An unexpected error occurred"),
+              backgroundColor: Colors.red, // Red background for errors
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
   }
@@ -80,23 +84,27 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
       if (e is Exception) {
         String errorMessage = e.toString();
 
-        // Show warning SnackBar with amber color
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.amber, // Amber color for warning
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Show warning SnackBar with amber color
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.amber, // Amber color for warning
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       } else {
-        // Handle unexpected errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("An unexpected error occurred"),
-            backgroundColor: Colors.red, // Red background for errors
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Handle unexpected errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("An unexpected error occurred"),
+              backgroundColor: Colors.red, // Red background for errors
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
   }
@@ -135,9 +143,12 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
     if (confirmDelete == true) {
       await DatabaseHelper.instance.deleteItem(widget.placeId, itemName);
       await _loadItems(); // Refresh the list
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Item "$itemName" deleted successfully.')),
-      );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Item "$itemName" deleted successfully.')),
+        );
+      }
     }
   }
 

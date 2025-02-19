@@ -41,23 +41,27 @@ class HomeScreenState extends State<HomeScreen> {
       if (e is Exception) {
         String errorMessage = e.toString();
 
-        // Show warning SnackBar with amber color
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.amber, // Amber color for warning
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Show warning SnackBar with amber color
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.amber, // Amber color for warning
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       } else {
-        // Handle unexpected errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("An unexpected error occurred"),
-            backgroundColor: Colors.red, // Red background for errors
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Handle unexpected errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("An unexpected error occurred"),
+              backgroundColor: Colors.red, // Red background for errors
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
   }
@@ -75,23 +79,27 @@ class HomeScreenState extends State<HomeScreen> {
       if (e is Exception) {
         String errorMessage = e.toString();
 
-        // Show warning SnackBar with amber color
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.amber, // Amber color for warning
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Show warning SnackBar with amber color
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.amber, // Amber color for warning
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       } else {
-        // Handle unexpected errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("An unexpected error occurred"),
-            backgroundColor: Colors.red, // Red background for errors
-            duration: Duration(seconds: 3),
-          ),
-        );
+        if (mounted) {
+          // Handle unexpected errors
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("An unexpected error occurred"),
+              backgroundColor: Colors.red, // Red background for errors
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       }
     }
   }
@@ -126,13 +134,18 @@ class HomeScreenState extends State<HomeScreen> {
       try {
         await DatabaseHelper.instance.deleteDorm(dorms[index].id!);
         await _loadDorms(); // Reload dorms after deleting
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Dorm "$dormName" deleted successfully.')),
-        );
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Dorm "$dormName" deleted successfully.')),
+          );
+        }
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete dorm: $e')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Failed to delete dorm: $e')),
+          );
+        }
       }
     }
   }
@@ -149,9 +162,9 @@ class HomeScreenState extends State<HomeScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
-              'Your Dorms:',
+              'Your Dorms',
               style: TextStyle(
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
                 fontFamily: 'Roboto', // Use a nice font
               ),

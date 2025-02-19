@@ -146,18 +146,17 @@ class DatabaseHelper {
 
   // Get places for a specific dorm
   Future<List<Place>> fetchPlaces(int dormId) async {
-  final db = await instance.database;
-  final placeMaps = await db.query(
-    'places',
-    where: 'dorm_id = ?',
-    whereArgs: [dormId],
-    orderBy: 'id ASC', // Maintain insertion order
-  );
+    final db = await instance.database;
+    final placeMaps = await db.query(
+      'places',
+      where: 'dorm_id = ?',
+      whereArgs: [dormId],
+      orderBy: 'id ASC', // Maintain insertion order
+    );
 
-  // Convert the list of maps to a list of Place objects
-  return placeMaps.map((placeMap) => Place.fromMap(placeMap)).toList();
-}
-
+    // Convert the list of maps to a list of Place objects
+    return placeMaps.map((placeMap) => Place.fromMap(placeMap)).toList();
+  }
 
   // Delete a place for a specific dorm
   Future<int> deletePlace(int dormId, String place) async {

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dorm_tracker/models/dorm.dart';
-import 'package:dorm_tracker/models/place.dart'; // Ensure Place model is imported
+import 'package:dorm_tracker/models/place.dart';
 import 'package:dorm_tracker/screens/add_edit_place_screen.dart';
 import 'package:dorm_tracker/screens/place_detail_screen.dart';
 import 'package:dorm_tracker/database_helper.dart';
@@ -83,9 +83,11 @@ class DormDetailScreenState extends State<DormDetailScreen> {
       try {
         await DatabaseHelper.instance.deletePlace(widget.dorm.id!, place.name);
         await _loadPlaces(); // Refresh the list
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Place "${place.name}" deleted successfully.')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Place "${place.name}" deleted successfully.')),
+          );
+        }
       } catch (e) {
         _showError(e);
       }
@@ -115,9 +117,9 @@ class DormDetailScreenState extends State<DormDetailScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Places in ${widget.dorm.name}:',
+              'Places in ${widget.dorm.name}',
               style: const TextStyle(
-                fontSize: 28,
+                fontSize: 24,
                 fontWeight: FontWeight.bold,
               ),
             ),
