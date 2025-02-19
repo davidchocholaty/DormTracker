@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dorm_tracker/models/dorm.dart';
 import 'package:dorm_tracker/screens/add_edit_dorm_screen.dart';
+import 'package:dorm_tracker/screens/dorm_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,7 +11,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class HomeScreenState extends State<HomeScreen> {
-  List<Dorm> dorms = [];
+  final List<Dorm> dorms = [];
 
   void _addDorm(Dorm dorm) {
     setState(() {
@@ -70,13 +71,13 @@ class HomeScreenState extends State<HomeScreen> {
                         onPressed: () async {
                           final result = await showModalBottomSheet(
                             context: context,
-                            builder: (context) => AddEditDormScreen(),
+                            builder: (context) => const AddEditDormScreen(),
                           );
                           if (result != null) {
                             _addDorm(result);
                           }
                         },
-                        child: Icon(Icons.add),
+                        child: const Icon(Icons.add),
                       ),
                     ],
                   ),
@@ -107,6 +108,15 @@ class HomeScreenState extends State<HomeScreen> {
                       child: Card(
                         child: ListTile(
                           title: Text(dorms[index].name),
+                          onTap: () {
+                            // Navigate to DormDetailScreen with the selected dorm
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DormDetailScreen(dorm: dorms[index]),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     );
