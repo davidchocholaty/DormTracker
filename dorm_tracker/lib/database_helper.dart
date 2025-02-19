@@ -145,7 +145,7 @@ class DatabaseHelper {
   // Get places for a specific dorm
   Future<List<String>> fetchPlaces(int dormId) async {
     final db = await database;
-    final placesData = await db.query('places', where: 'dorm_id = ?', whereArgs: [dormId]);
+    final placesData = await db.query('places', where: 'dorm_id = ?', whereArgs: [dormId], orderBy: 'id ASC');
 
     return placesData.map((place) => place['name'] as String).toList();
   }
@@ -204,6 +204,7 @@ class DatabaseHelper {
       'items',
       where: 'placeName = ?',
       whereArgs: [placeName],
+      orderBy: 'id ASC',
     );
     return result;
   }
