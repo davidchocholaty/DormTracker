@@ -116,11 +116,11 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove),
-                              onPressed: () {
-                                if (items[index]['count'] > 0) {
-                                  _updateItemCount(index, items[index]['count'] - 1);
-                                }
-                              },
+                              onPressed: (items[index]['count'] > 0) 
+                                ? () {
+                                    _updateItemCount(index, items[index]['count'] - 1);
+                                  } 
+                                : null, // Disable button when count is 0
                             ),
                             GestureDetector(
                               onTap: () => _editItemCount(index), // Open manual edit dialog
