@@ -109,8 +109,35 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   // Delete an item
   Future<void> _deleteItem(int index) async {
-    await DatabaseHelper.instance.deleteItem(widget.placeId, items[index]['name']);
-    await _loadItems(); // Reload list
+    // Show confirmation dialog
+    bool? confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Item'),
+          content: const Text('Are you sure you want to delete this item? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed, delete the item
+    if (confirmDelete == true) {
+      await DatabaseHelper.instance.deleteItem(widget.placeId, items[index]['name']);
+      await _loadItems(); // Refresh the list
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Item deleted successfully.')),
+      );
+    }
   }
 
   // Open dialog to manually edit count
