@@ -96,10 +96,45 @@ class HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  // Delete a dorm from the database
+  // Delete a dorm from the database with confirmation
   Future<void> _deleteDorm(int index) async {
-    await DatabaseHelper.instance.deleteDorm(dorms[index].id!);
-    await _loadDorms(); // Reload dorms after deleting
+    String dormName = dorms[index].name;
+
+    // Show confirmation dialog
+    bool? confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Dorm'),
+          content: Text('Are you sure you want to delete the dorm "$dormName"? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed, delete the dorm
+    if (confirmDelete == true) {
+      try {
+        await DatabaseHelper.instance.deleteDorm(dorms[index].id!);
+        await _loadDorms(); // Reload dorms after deleting
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Dorm "$dormName" deleted successfully.')),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to delete dorm: $e')),
+        );
+      }
+    }
   }
 
   @override
