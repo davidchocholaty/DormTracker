@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dorm_tracker/models/dorm.dart';
 import 'package:dorm_tracker/screens/add_edit_place_screen.dart';
+import 'package:dorm_tracker/screens/place_detail_screen.dart';
 import 'package:dorm_tracker/database_helper.dart';
 
 class DormDetailScreen extends StatefulWidget {
@@ -120,6 +121,18 @@ class DormDetailScreenState extends State<DormDetailScreen> {
                       child: Card(
                         child: ListTile(
                           title: Text(places[index]),
+                          onTap: () {
+                            // Navigate to PlaceDetailScreen
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PlaceDetailScreen(
+                                  dormName: widget.dorm.name,
+                                  placeName: places[index],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       ),
                     );
@@ -128,7 +141,7 @@ class DormDetailScreenState extends State<DormDetailScreen> {
               ),
             const SizedBox(height: 20),
             const Text(
-              'Hold card to modify',
+              'Tap to view details, hold to modify',
               style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
             ),
           ],
