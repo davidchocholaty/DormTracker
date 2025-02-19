@@ -194,8 +194,23 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
             ),
             const SizedBox(height: 20),
             if (items.isEmpty)
-              const Center(
-                child: Text("No items added yet. Add some!", style: TextStyle(color: Colors.grey)),
+              Expanded(
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'No items added yet. Add some!',
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                      ),
+                      const SizedBox(height: 20),
+                      FloatingActionButton(
+                        onPressed: _showAddItemDialog,
+                        child: const Icon(Icons.add),
+                      ),
+                    ],
+                  ),
+                ),
               )
             else
               Expanded(
@@ -261,43 +276,47 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          TextEditingController controller = TextEditingController();
-
-          final result = await showDialog<String>(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: const Text("Add New Item"),
-                content: TextField(
-                  controller: controller,
-                  decoration: const InputDecoration(labelText: "Item name"),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("Cancel"),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      if (controller.text.trim().isNotEmpty) {
-                        Navigator.pop(context, controller.text.trim());
-                      }
-                    },
-                    child: const Text("Add"),
-                  ),
-                ],
-              );
-            },
-          );
-
-          if (result != null) {
-            _addItem(result);
-          }
-        },
+      floatingActionButton: items.isEmpty
+        ? null
+        : FloatingActionButton(
+        onPressed: _showAddItemDialog,
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  void _showAddItemDialog() async {
+    TextEditingController controller = TextEditingController();
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Add New Item"),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(labelText: "Item name"),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                if (controller.text.trim().isNotEmpty) {
+                  Navigator.pop(context, controller.text.trim());
+                }
+              },
+              child: const Text("Add"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result != null) {
+      _addItem(result);
+    }
   }
 }
