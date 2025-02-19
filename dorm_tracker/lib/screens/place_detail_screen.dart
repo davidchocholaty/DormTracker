@@ -32,21 +32,19 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
   // Add a new item
   Future<void> _addItem(String itemName) async {
     await DatabaseHelper.instance.insertItem(widget.placeName, itemName, 0);
-    _loadItems(); // Reload list
+    await _loadItems(); // Reload list
   }
 
   // Update item count
   Future<void> _updateItemCount(int index, int newCount) async {
     await DatabaseHelper.instance.updateItemCount(widget.placeName, items[index]['name'], newCount);
-    setState(() {
-      items[index]['count'] = newCount; // Update UI instantly
-    });
+    await _loadItems(); // Reload items from database
   }
 
   // Delete an item
   Future<void> _deleteItem(int index) async {
     await DatabaseHelper.instance.deleteItem(widget.placeName, items[index]['name']);
-    _loadItems(); // Reload list
+    await _loadItems(); // Reload list
   }
 
   // Open dialog to manually edit count
