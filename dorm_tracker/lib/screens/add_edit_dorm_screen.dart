@@ -78,7 +78,12 @@ class AddEditDormScreenState extends State<AddEditDormScreen> {
                             onPressed: () {
                               if (_formKey.currentState!.validate()) {
                                 _formKey.currentState!.save();
-                                Navigator.of(context).pop(Dorm(name: _name));
+                                // If editing, preserve the existing dorm id
+                                final updatedDorm = Dorm(
+                                  id: widget.dorm?.id,  // Preserve the existing id when editing
+                                  name: _name,
+                                );
+                                Navigator.of(context).pop(updatedDorm);
                               }
                             },
                             child: Text(widget.isEditing ? 'Save' : 'Add'),

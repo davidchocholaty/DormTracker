@@ -125,6 +125,20 @@ class DatabaseHelper {
   // Insert a place for a specific dorm
   Future<int> insertPlace(int dormId, String place) async {
     final db = await database;
+
+    // Check if the place already exists for the given dorm
+    final existingPlace = await db.query(
+      'places',
+      where: 'dorm_id = ? AND name = ?',
+      whereArgs: [dormId, place],
+    );
+
+    // If place exists, throw an exception
+    if (existingPlace.isNotEmpty) {
+      throw Exception("Place with this name already exists.");
+    }
+
+    // If not exists, insert the place
     return await db.insert('places', {'dorm_id': dormId, 'name': place});
   }
 
@@ -149,6 +163,32 @@ class DatabaseHelper {
   // Update a place's name for a specific dorm
   Future<int> updatePlace(int dormId, String oldPlace, String newPlace) async {
     final db = await database;
+
+    // Check if the old place exists for the given dorm
+    final existingPlace = await db.query(
+      'places',
+      where: 'dorm_id = ? AND name = ?',
+      whereArgs: [dormId, oldPlace],
+    );
+
+    // If the old place doesn't exist, throw an exception
+    if (existingPlace.isEmpty) {
+      throw Exception("The place to update doesn't exist.");
+    }
+
+    // Check if the new place already exists for the given dorm
+    final duplicatePlace = await db.query(
+      'places',
+      where: 'dorm_id = ? AND name = ?',
+      whereArgs: [dormId, newPlace],
+    );
+
+    // If new place already exists, throw an exception
+    if (duplicatePlace.isNotEmpty) {
+      throw Exception("Place with this new name already exists.");
+    }
+
+    // Proceed with the update if checks pass
     return await db.update(
       'places',
       {'name': newPlace},

@@ -33,14 +33,60 @@ class DormDetailScreenState extends State<DormDetailScreen> {
 
   // Add a new place to the database
   Future<void> _addPlace(String place) async {
-    await DatabaseHelper.instance.insertPlace(widget.dorm.id!, place);
-    await _loadPlaces(); // Reload the list of places
+    try {
+      await DatabaseHelper.instance.insertPlace(widget.dorm.id!, place);
+      await _loadPlaces(); // Reload the list of places
+    } catch (e) {
+      // Show a warning SnackBar if the exception is thrown
+      if (e is Exception) {
+        String errorMessage = e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.amber, // Amber color for warning
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Handle unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred"),
+            backgroundColor: Colors.red, // Red background for errors
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   // Edit an existing place in the database
   Future<void> _editPlace(int index, String newPlace) async {
-    await DatabaseHelper.instance.updatePlace(widget.dorm.id!, places[index], newPlace);
-    await _loadPlaces(); // Reload the list of places
+    try {
+      await DatabaseHelper.instance.updatePlace(widget.dorm.id!, places[index], newPlace);
+      await _loadPlaces(); // Reload the list of places
+    } catch (e) {
+      // Show a warning SnackBar if the exception is thrown
+      if (e is Exception) {
+        String errorMessage = e.toString();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.amber, // Amber color for warning
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Handle unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred"),
+            backgroundColor: Colors.red, // Red background for errors
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   // Delete a place from the database
