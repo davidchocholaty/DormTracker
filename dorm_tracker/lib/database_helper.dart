@@ -30,7 +30,7 @@ class DatabaseHelper {
     await db.execute('''
       CREATE TABLE dorms (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL
+        name TEXT NOT NULL UNIQUE
       )
     ''');
 
@@ -40,7 +40,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         dorm_id INTEGER,
         name TEXT NOT NULL,
-        FOREIGN KEY (dorm_id) REFERENCES dorms (id) ON DELETE CASCADE
+        FOREIGN KEY (dorm_id) REFERENCES dorms (id) ON DELETE CASCADE,
+        UNIQUE(dorm_id, name)  -- Ensures unique place names per dorm, but same names can exist in different dorms
       )
     ''');
 
@@ -49,7 +50,8 @@ class DatabaseHelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         placeName TEXT NOT NULL,
         name TEXT NOT NULL,
-        count INTEGER DEFAULT 0
+        count INTEGER DEFAULT 0,
+        UNIQUE(placeName, name) -- Allow duplicates across places but not within the same place
       )
     ''');
   }
@@ -141,10 +143,24 @@ class DatabaseHelper {
   // Insert new item with default count of 0
   Future<void> insertItem(String placeName, String itemName, int count) async {
     final db = await instance.database;
+
+    // Check if the item already exists in any place
+    final existingItem = await db.query(
+      'items',
+      where: 'placeName = ? AND name = ?',
+      whereArgs: [placeName, itemName],
+    );
+
+
+    if (existingItem.isNotEmpty) {
+      throw Exception("Item with this name already exists.");
+    }
+
+    // Insert the item if it's not a duplicate
     await db.insert(
       'items',
       {'placeName': placeName, 'name': itemName, 'count': count},
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: ConflictAlgorithm.ignore, // Prevent crashing if unique constraint fails
     );
   }
 

@@ -31,8 +31,36 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   // Add a new item
   Future<void> _addItem(String itemName) async {
-    await DatabaseHelper.instance.insertItem(widget.placeName, itemName, 0);
-    await _loadItems(); // Reload list
+    try {
+      // Try to add the item to the database
+      await DatabaseHelper.instance.insertItem(widget.placeName, itemName, 0);
+
+      // Reload list after successfully adding the item
+      await _loadItems();
+    } catch (e) {
+      // Handle error when item already exists
+      if (e is Exception) {
+        String errorMessage = e.toString();
+
+        // Show warning SnackBar with amber color
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: Colors.amber, // Amber color for warning
+            duration: Duration(seconds: 3),
+          ),
+        );
+      } else {
+        // Handle unexpected errors
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("An unexpected error occurred"),
+            backgroundColor: Colors.red, // Red background for errors
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   // Update item count
