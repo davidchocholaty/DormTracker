@@ -55,12 +55,40 @@ class DormDetailScreenState extends State<DormDetailScreen> {
 
   // Delete a place from the database
   Future<void> _deletePlace(int index) async {
-    try {
-      final place = places[index];
-      await DatabaseHelper.instance.deletePlace(widget.dorm.id!, place.name);
-      await _loadPlaces();
-    } catch (e) {
-      _showError(e);
+    final place = places[index];
+
+    // Show confirmation dialog
+    bool? confirmDelete = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Place'),
+          content: Text('Are you sure you want to delete the place "${place.name}"? This action cannot be undone.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
+            ),
+          ],
+        );
+      },
+    );
+
+    // If user confirmed, delete the place
+    if (confirmDelete == true) {
+      try {
+        await DatabaseHelper.instance.deletePlace(widget.dorm.id!, place.name);
+        await _loadPlaces(); // Refresh the list
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Place "${place.name}" deleted successfully.')),
+        );
+      } catch (e) {
+        _showError(e);
+      }
     }
   }
 
