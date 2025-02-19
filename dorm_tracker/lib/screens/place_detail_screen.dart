@@ -117,7 +117,7 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.placeName)),
+      appBar: AppBar(title: Text("${widget.dormName} - ${widget.placeName}")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

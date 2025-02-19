@@ -196,7 +196,7 @@ class HomeScreenState extends State<HomeScreen> {
               ),
             const SizedBox(height: 20),
             const Text(
-              'Hold card to modify',
+              'Tap to view details, hold to modify',
               style: TextStyle(
                 fontStyle: FontStyle.italic,
                 color: Colors.grey,
