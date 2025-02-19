@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dorm_tracker/models/dorm.dart';
+import 'package:dorm_tracker/models/place.dart'; // Ensure Place model is imported
 import 'package:dorm_tracker/screens/add_edit_place_screen.dart';
 import 'package:dorm_tracker/screens/place_detail_screen.dart';
 import 'package:dorm_tracker/database_helper.dart';
@@ -14,85 +15,64 @@ class DormDetailScreen extends StatefulWidget {
 }
 
 class DormDetailScreenState extends State<DormDetailScreen> {
-  late List<String> places;
+  late List<Place> places;
 
   @override
   void initState() {
     super.initState();
-    places = List.from(widget.dorm.places); // Initialize from dorm's places
-    _loadPlaces(); // Load places from the database when the screen is initialized
+    places = [];
+    _loadPlaces();
   }
 
   // Fetch places from the database
   Future<void> _loadPlaces() async {
     final fetchedPlaces = await DatabaseHelper.instance.fetchPlaces(widget.dorm.id!);
     setState(() {
-      places = fetchedPlaces;
+      places = fetchedPlaces; // No need to map, as fetchedPlaces is already List<Place>
     });
   }
 
   // Add a new place to the database
-  Future<void> _addPlace(String place) async {
+  Future<void> _addPlace(String placeName) async {
     try {
-      await DatabaseHelper.instance.insertPlace(widget.dorm.id!, place);
-      await _loadPlaces(); // Reload the list of places
+      await DatabaseHelper.instance.insertPlace(widget.dorm.id!, placeName);
+      await _loadPlaces();
     } catch (e) {
-      // Show a warning SnackBar if the exception is thrown
-      if (e is Exception) {
-        String errorMessage = e.toString();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.amber, // Amber color for warning
-            duration: Duration(seconds: 3),
-          ),
-        );
-      } else {
-        // Handle unexpected errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("An unexpected error occurred"),
-            backgroundColor: Colors.red, // Red background for errors
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
+      _showError(e);
     }
   }
 
   // Edit an existing place in the database
-  Future<void> _editPlace(int index, String newPlace) async {
+  Future<void> _editPlace(int index, String newPlaceName) async {
     try {
-      await DatabaseHelper.instance.updatePlace(widget.dorm.id!, places[index], newPlace);
-      await _loadPlaces(); // Reload the list of places
+      final place = places[index];
+      await DatabaseHelper.instance.updatePlace(widget.dorm.id!, place.name, newPlaceName);
+      await _loadPlaces();
     } catch (e) {
-      // Show a warning SnackBar if the exception is thrown
-      if (e is Exception) {
-        String errorMessage = e.toString();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(errorMessage),
-            backgroundColor: Colors.amber, // Amber color for warning
-            duration: Duration(seconds: 3),
-          ),
-        );
-      } else {
-        // Handle unexpected errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("An unexpected error occurred"),
-            backgroundColor: Colors.red, // Red background for errors
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
+      _showError(e);
     }
   }
 
   // Delete a place from the database
   Future<void> _deletePlace(int index) async {
-    await DatabaseHelper.instance.deletePlace(widget.dorm.id!, places[index]);
-    await _loadPlaces(); // Reload the list of places
+    try {
+      final place = places[index];
+      await DatabaseHelper.instance.deletePlace(widget.dorm.id!, place.name);
+      await _loadPlaces();
+    } catch (e) {
+      _showError(e);
+    }
+  }
+
+  // Display error message
+  void _showError(dynamic e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.amber,
+        duration: const Duration(seconds: 3),
+      ),
+    );
   }
 
   @override
@@ -114,7 +94,6 @@ class DormDetailScreenState extends State<DormDetailScreen> {
               ),
             ),
             const SizedBox(height: 20),
-            // Check if the list is empty
             if (places.isEmpty)
               Expanded(
                 child: Center(
@@ -127,15 +106,7 @@ class DormDetailScreenState extends State<DormDetailScreen> {
                       ),
                       const SizedBox(height: 20),
                       FloatingActionButton(
-                        onPressed: () async {
-                          final result = await showModalBottomSheet(
-                            context: context,
-                            builder: (context) => const AddEditPlaceScreen(),
-                          );
-                          if (result != null && result is String) {
-                            _addPlace(result); // Add the new place
-                          }
-                        },
+                        onPressed: _showAddPlaceDialog,
                         child: const Icon(Icons.add),
                       ),
                     ],
@@ -147,34 +118,35 @@ class DormDetailScreenState extends State<DormDetailScreen> {
                 child: ListView.builder(
                   itemCount: places.length,
                   itemBuilder: (context, index) {
+                    final place = places[index];
                     return GestureDetector(
                       onLongPress: () async {
                         final result = await showModalBottomSheet(
                           context: context,
                           builder: (context) => AddEditPlaceScreen(
-                            place: places[index],
+                            place: place.name,
                             isEditing: true,
                           ),
                         );
                         if (result != null) {
                           if (result == 'delete') {
-                            _deletePlace(index); // Delete place
+                            _deletePlace(index);
                           } else {
-                            _editPlace(index, result); // Edit place
+                            _editPlace(index, result);
                           }
                         }
                       },
                       child: Card(
                         child: ListTile(
-                          title: Text(places[index]),
+                          title: Text(place.name),
                           onTap: () {
-                            // Navigate to PlaceDetailScreen
                             Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => PlaceDetailScreen(
                                   dormName: widget.dorm.name,
-                                  placeName: places[index],
+                                  placeId: place.id,
+                                  placeName: place.name,
                                 ),
                               ),
                             );
@@ -196,17 +168,19 @@ class DormDetailScreenState extends State<DormDetailScreen> {
       floatingActionButton: places.isEmpty
           ? null
           : FloatingActionButton(
-              onPressed: () async {
-                final result = await showModalBottomSheet(
-                  context: context,
-                  builder: (context) => const AddEditPlaceScreen(),
-                );
-                if (result != null && result is String) {
-                  _addPlace(result); // Add the new place
-                }
-              },
+              onPressed: _showAddPlaceDialog,
               child: const Icon(Icons.add),
             ),
     );
+  }
+
+  void _showAddPlaceDialog() async {
+    final result = await showModalBottomSheet(
+      context: context,
+      builder: (context) => const AddEditPlaceScreen(),
+    );
+    if (result != null && result is String) {
+      _addPlace(result);
+    }
   }
 }

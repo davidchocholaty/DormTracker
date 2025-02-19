@@ -4,9 +4,10 @@ import 'package:dorm_tracker/screens/add_edit_item_screen.dart';
 
 class PlaceDetailScreen extends StatefulWidget {
   final String dormName;
+  final int placeId;
   final String placeName;
 
-  const PlaceDetailScreen({super.key, required this.dormName, required this.placeName});
+  const PlaceDetailScreen({super.key, required this.dormName, required this.placeId, required this.placeName});
 
   @override
   PlaceDetailScreenState createState() => PlaceDetailScreenState();
@@ -24,7 +25,7 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   // Fetch items for this place from the database
   Future<void> _loadItems() async {
-    final fetchedItems = await DatabaseHelper.instance.fetchItems(widget.placeName);
+    final fetchedItems = await DatabaseHelper.instance.fetchItems(widget.placeId);
     setState(() {
       items = fetchedItems;
     });
@@ -34,7 +35,7 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
   Future<void> _addItem(String itemName) async {
     try {
       // Try to add the item to the database
-      await DatabaseHelper.instance.insertItem(widget.placeName, itemName, 0);
+      await DatabaseHelper.instance.insertItem(widget.placeId, itemName, 0);
 
       // Reload list after successfully adding the item
       await _loadItems();
@@ -69,7 +70,7 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
     try {
       // Try to update the item name in the database (count stays the same)
       await DatabaseHelper.instance.updateItemName(
-        widget.placeName,
+        widget.placeId,
         items[index]['name'], // Original name
         newItemName, // New name
       );
@@ -102,13 +103,13 @@ class PlaceDetailScreenState extends State<PlaceDetailScreen> {
 
   // Update item count
   Future<void> _updateItemCount(int index, int newCount) async {
-    await DatabaseHelper.instance.updateItemCount(widget.placeName, items[index]['name'], newCount);
+    await DatabaseHelper.instance.updateItemCount(widget.placeId, items[index]['name'], newCount);
     await _loadItems(); // Reload items from database
   }
 
   // Delete an item
   Future<void> _deleteItem(int index) async {
-    await DatabaseHelper.instance.deleteItem(widget.placeName, items[index]['name']);
+    await DatabaseHelper.instance.deleteItem(widget.placeId, items[index]['name']);
     await _loadItems(); // Reload list
   }
 

@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'package:dorm_tracker/models/dorm.dart';
+import 'package:dorm_tracker/models/place.dart';
 
 class DatabaseHelper {
   static final DatabaseHelper instance = DatabaseHelper._init();
@@ -46,14 +47,15 @@ class DatabaseHelper {
     ''');
 
     await db.execute('''
-      CREATE TABLE items (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        placeName TEXT NOT NULL,
-        name TEXT NOT NULL,
-        count INTEGER DEFAULT 0,
-        UNIQUE(placeName, name) -- Allow duplicates across places but not within the same place
-      )
-    ''');
+    CREATE TABLE items (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      place_id INTEGER NOT NULL, -- Foreign key referencing places
+      name TEXT NOT NULL,
+      count INTEGER DEFAULT 0,
+      UNIQUE(place_id, name), -- Ensure unique items within the same place
+      FOREIGN KEY (place_id) REFERENCES places (id) ON DELETE CASCADE
+    )
+  ''');
   }
 
   // Insert a dorm into the database, ensuring the dorm name is unique
@@ -83,7 +85,7 @@ class DatabaseHelper {
 
     List<Dorm> dorms = [];
     for (var dorm in dormsData) {
-      List<String> places = await fetchPlaces(dorm['id'] as int);
+      List<Place> places = await fetchPlaces(dorm['id'] as int);
       dorms.add(Dorm(id: dorm['id'] as int, name: dorm['name'] as String, places: places));
     }
     return dorms;
@@ -143,12 +145,19 @@ class DatabaseHelper {
   }
 
   // Get places for a specific dorm
-  Future<List<String>> fetchPlaces(int dormId) async {
-    final db = await database;
-    final placesData = await db.query('places', where: 'dorm_id = ?', whereArgs: [dormId], orderBy: 'id ASC');
+  Future<List<Place>> fetchPlaces(int dormId) async {
+  final db = await instance.database;
+  final placeMaps = await db.query(
+    'places',
+    where: 'dorm_id = ?',
+    whereArgs: [dormId],
+    orderBy: 'id ASC', // Maintain insertion order
+  );
 
-    return placesData.map((place) => place['name'] as String).toList();
-  }
+  // Convert the list of maps to a list of Place objects
+  return placeMaps.map((placeMap) => Place.fromMap(placeMap)).toList();
+}
+
 
   // Delete a place for a specific dorm
   Future<int> deletePlace(int dormId, String place) async {
@@ -198,28 +207,27 @@ class DatabaseHelper {
   }
 
   // Fetch items for a specific place
-  Future<List<Map<String, dynamic>>> fetchItems(String placeName) async {
+  Future<List<Map<String, dynamic>>> fetchItems(int placeId) async {
     final db = await instance.database;
     final result = await db.query(
       'items',
-      where: 'placeName = ?',
-      whereArgs: [placeName],
+      where: 'place_id = ?',
+      whereArgs: [placeId],
       orderBy: 'id ASC',
     );
     return result;
   }
 
   // Insert new item with default count of 0
-  Future<void> insertItem(String placeName, String itemName, int count) async {
+  Future<void> insertItem(int placeId, String itemName, int count) async {
     final db = await instance.database;
 
     // Check if the item already exists in any place
     final existingItem = await db.query(
       'items',
-      where: 'placeName = ? AND name = ?',
-      whereArgs: [placeName, itemName],
+      where: 'place_id = ? AND name = ?',
+      whereArgs: [placeId, itemName],
     );
-
 
     if (existingItem.isNotEmpty) {
       throw Exception("Item with this name already exists.");
@@ -228,31 +236,31 @@ class DatabaseHelper {
     // Insert the item if it's not a duplicate
     await db.insert(
       'items',
-      {'placeName': placeName, 'name': itemName, 'count': count},
+      {'place_id': placeId, 'name': itemName, 'count': count},
       conflictAlgorithm: ConflictAlgorithm.ignore, // Prevent crashing if unique constraint fails
     );
   }
 
   // Update item count
-  Future<void> updateItemCount(String placeName, String itemName, int newCount) async {
+  Future<void> updateItemCount(int placeId, String itemName, int newCount) async {
     final db = await instance.database;
     await db.update(
       'items',
       {'count': newCount},
-      where: 'placeName = ? AND name = ?',
-      whereArgs: [placeName, itemName],
+      where: 'place_id = ? AND name = ?',
+      whereArgs: [placeId, itemName],
     );
   }
 
   // Update item name in the database
-  Future<void> updateItemName(String placeName, String oldItemName, String newItemName) async {
+  Future<void> updateItemName(int placeId, String oldItemName, String newItemName) async {
     final db = await instance.database;
 
     // Check if the item exists in the place (old name)
     final existingItem = await db.query(
       'items',
-      where: 'placeName = ? AND name = ?',
-      whereArgs: [placeName, oldItemName],
+      where: 'place_id = ? AND name = ?',
+      whereArgs: [placeId, oldItemName],
     );
 
     if (existingItem.isEmpty) {
@@ -262,8 +270,8 @@ class DatabaseHelper {
     // Check if the new item name already exists in the same place
     final duplicateItem = await db.query(
       'items',
-      where: 'placeName = ? AND name = ?',
-      whereArgs: [placeName, newItemName],
+      where: 'place_id = ? AND name = ?',
+      whereArgs: [placeId, newItemName],
     );
 
     if (duplicateItem.isNotEmpty) {
@@ -274,18 +282,18 @@ class DatabaseHelper {
     await db.update(
       'items',
       {'name': newItemName},
-      where: 'placeName = ? AND name = ?',
-      whereArgs: [placeName, oldItemName],
+      where: 'place_id = ? AND name = ?',
+      whereArgs: [placeId, oldItemName],
     );
   }
 
   // Delete an item
-  Future<void> deleteItem(String placeName, String itemName) async {
+  Future<void> deleteItem(int placeId, String itemName) async {
     final db = await instance.database;
     await db.delete(
       'items',
-      where: 'placeName = ? AND name = ?',
-      whereArgs: [placeName, itemName],
+      where: 'place_id = ? AND name = ?',
+      whereArgs: [placeId, itemName],
     );
   }
 }
