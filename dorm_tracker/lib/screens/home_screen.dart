@@ -31,76 +31,20 @@ class HomeScreenState extends State<HomeScreen> {
   // Add a new dorm to the database
   Future<void> _addDorm(Dorm dorm) async {
     try {
-      // Try to add the dorm to the database
       await DatabaseHelper.instance.insertDorm(dorm);
-
-      // Reload the list of dorms after successfully adding the dorm
       await _loadDorms();
     } catch (e) {
-      // Handle error when dorm name already exists
-      if (e is Exception) {
-        String errorMessage = e.toString();
-
-        if (mounted) {
-          // Show warning SnackBar with amber color
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.amber, // Amber color for warning
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          // Handle unexpected errors
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("An unexpected error occurred"),
-              backgroundColor: Colors.red, // Red background for errors
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      }
+      _showError(e);
     }
   }
 
   // Edit a dorm's name in the database
   Future<void> _editDorm(int index, Dorm dorm) async {
     try {
-      // Try to update the dorm in the database
       await DatabaseHelper.instance.updateDorm(dorm);
-
-      // Reload the list of dorms after successfully editing the dorm
       await _loadDorms();
     } catch (e) {
-      // Handle error when dorm name already exists
-      if (e is Exception) {
-        String errorMessage = e.toString();
-
-        if (mounted) {
-          // Show warning SnackBar with amber color
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(errorMessage),
-              backgroundColor: Colors.amber, // Amber color for warning
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      } else {
-        if (mounted) {
-          // Handle unexpected errors
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("An unexpected error occurred"),
-              backgroundColor: Colors.red, // Red background for errors
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-      }
+      _showError(e);
     }
   }
 
@@ -108,7 +52,6 @@ class HomeScreenState extends State<HomeScreen> {
   Future<void> _deleteDorm(int index) async {
     String dormName = dorms[index].name;
 
-    // Show confirmation dialog
     bool? confirmDelete = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -117,11 +60,11 @@ class HomeScreenState extends State<HomeScreen> {
           content: Text('Are you sure you want to delete the dorm "$dormName"? This action cannot be undone.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
@@ -129,25 +72,59 @@ class HomeScreenState extends State<HomeScreen> {
       },
     );
 
-    // If user confirmed, delete the dorm
     if (confirmDelete == true) {
       try {
         await DatabaseHelper.instance.deleteDorm(dorms[index].id!);
-        await _loadDorms(); // Reload dorms after deleting
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Dorm "$dormName" deleted successfully.')),
-          );
-        }
+        await _loadDorms();
+        _showSnackBar('Dorm "$dormName" deleted successfully.');
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete dorm: $e')),
-          );
-        }
+        _showError(e);
       }
     }
+  }
+
+  // Show dialog for adding or editing a dorm
+  Future<void> _showAddEditDormDialog({Dorm? dorm, bool isEditing = false}) async {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final topPadding = screenHeight * 0.2; // 20% of the screen height
+
+    final result = await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.only(top: topPadding),
+        child: AddEditDormScreen(
+          dorm: dorm,
+          isEditing: isEditing,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      if (result == 'delete') {
+        if (dorm != null) _deleteDorm(dorms.indexWhere((d) => d.id == dorm.id));
+      } else if (isEditing) {
+        _editDorm(dorms.indexWhere((d) => d.id == dorm?.id), result);
+      } else {
+        _addDorm(result);
+      }
+    }
+  }
+
+  void _showError(dynamic error) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(error.toString()),
+        backgroundColor: Colors.amber,
+        duration: const Duration(seconds: 3),
+      ),
+    );
+  }
+
+  void _showSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
   }
 
   @override
@@ -166,7 +143,6 @@ class HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Roboto', // Use a nice font
               ),
             ),
             const SizedBox(height: 20),
@@ -179,23 +155,11 @@ class HomeScreenState extends State<HomeScreen> {
                       const Text(
                         'There are no dorms yet. Please add a dorm.',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.grey,
-                          fontFamily: 'Roboto',
-                        ),
+                        style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
                       const SizedBox(height: 20),
                       FloatingActionButton(
-                        onPressed: () async {
-                          final result = await showModalBottomSheet(
-                            context: context,
-                            builder: (context) => const AddEditDormScreen(),
-                          );
-                          if (result != null) {
-                            _addDorm(result);
-                          }
-                        },
+                        onPressed: () => _showAddEditDormDialog(),
                         child: const Icon(Icons.add),
                       ),
                     ],
@@ -211,22 +175,10 @@ class HomeScreenState extends State<HomeScreen> {
                         itemCount: dorms.length,
                         itemBuilder: (context, index) {
                           return GestureDetector(
-                            onLongPress: () async {
-                              final result = await showModalBottomSheet(
-                                context: context,
-                                builder: (context) => AddEditDormScreen(
-                                  dorm: dorms[index],
-                                  isEditing: true,
-                                ),
-                              );
-                              if (result != null) {
-                                if (result == 'delete') {
-                                  _deleteDorm(index);
-                                } else {
-                                  _editDorm(index, result);
-                                }
-                              }
-                            },
+                            onLongPress: () => _showAddEditDormDialog(
+                              dorm: dorms[index],
+                              isEditing: true,
+                            ),
                             child: Card(
                               child: ListTile(
                                 title: Text(dorms[index].name),
@@ -261,15 +213,7 @@ class HomeScreenState extends State<HomeScreen> {
       floatingActionButton: dorms.isEmpty
           ? null
           : FloatingActionButton(
-              onPressed: () async {
-                final result = await showModalBottomSheet(
-                  context: context,
-                  builder: (context) => const AddEditDormScreen(),
-                );
-                if (result != null) {
-                  _addDorm(result);
-                }
-              },
+              onPressed: () => _showAddEditDormDialog(),
               child: const Icon(Icons.add),
             ),
     );

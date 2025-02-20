@@ -24,15 +24,13 @@ class DormDetailScreenState extends State<DormDetailScreen> {
     _loadPlaces();
   }
 
-  // Fetch places from the database
   Future<void> _loadPlaces() async {
     final fetchedPlaces = await DatabaseHelper.instance.fetchPlaces(widget.dorm.id!);
     setState(() {
-      places = fetchedPlaces; // No need to map, as fetchedPlaces is already List<Place>
+      places = fetchedPlaces;
     });
   }
 
-  // Add a new place to the database
   Future<void> _addPlace(String placeName) async {
     try {
       await DatabaseHelper.instance.insertPlace(widget.dorm.id!, placeName);
@@ -42,7 +40,6 @@ class DormDetailScreenState extends State<DormDetailScreen> {
     }
   }
 
-  // Edit an existing place in the database
   Future<void> _editPlace(int index, String newPlaceName) async {
     try {
       final place = places[index];
@@ -53,11 +50,9 @@ class DormDetailScreenState extends State<DormDetailScreen> {
     }
   }
 
-  // Delete a place from the database
   Future<void> _deletePlace(int index) async {
     final place = places[index];
 
-    // Show confirmation dialog
     bool? confirmDelete = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -66,11 +61,11 @@ class DormDetailScreenState extends State<DormDetailScreen> {
           content: Text('Are you sure you want to delete the place "${place.name}"? This action cannot be undone.'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false), // Cancel
+              onPressed: () => Navigator.of(context).pop(false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: () => Navigator.of(context).pop(true), // Confirm
+              onPressed: () => Navigator.of(context).pop(true),
               child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
@@ -78,11 +73,10 @@ class DormDetailScreenState extends State<DormDetailScreen> {
       },
     );
 
-    // If user confirmed, delete the place
     if (confirmDelete == true) {
       try {
         await DatabaseHelper.instance.deletePlace(widget.dorm.id!, place.name);
-        await _loadPlaces(); // Refresh the list
+        await _loadPlaces();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Place "${place.name}" deleted successfully.')),
@@ -94,7 +88,6 @@ class DormDetailScreenState extends State<DormDetailScreen> {
     }
   }
 
-  // Display error message
   void _showError(dynamic e) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -153,22 +146,7 @@ class DormDetailScreenState extends State<DormDetailScreen> {
                         itemBuilder: (context, index) {
                           final place = places[index];
                           return GestureDetector(
-                            onLongPress: () async {
-                              final result = await showModalBottomSheet(
-                                context: context,
-                                builder: (context) => AddEditPlaceScreen(
-                                  place: place.name,
-                                  isEditing: true,
-                                ),
-                              );
-                              if (result != null) {
-                                if (result == 'delete') {
-                                  _deletePlace(index);
-                                } else {
-                                  _editPlace(index, result);
-                                }
-                              }
-                            },
+                            onLongPress: () => _showEditPlaceDialog(place.name, index),
                             child: Card(
                               child: ListTile(
                                 title: Text(place.name),
@@ -195,9 +173,9 @@ class DormDetailScreenState extends State<DormDetailScreen> {
                       'Tap to view details, hold to modify',
                       style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
                     ),
-                    ],
-                  ),
-                )
+                  ],
+                ),
+              )
           ],
         ),
       ),
@@ -211,12 +189,43 @@ class DormDetailScreenState extends State<DormDetailScreen> {
   }
 
   void _showAddPlaceDialog() async {
-    final result = await showModalBottomSheet(
+    final screenHeight = MediaQuery.of(context).size.height;
+    final topPadding = screenHeight * 0.2;
+
+    final result = await showDialog<String>(
       context: context,
-      builder: (context) => const AddEditPlaceScreen(),
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.only(top: topPadding),
+        child: const AddEditPlaceScreen(),
+      ),
     );
-    if (result != null && result is String) {
+
+    if (result != null) {
       _addPlace(result);
+    }
+  }
+
+  void _showEditPlaceDialog(String placeName, int index) async {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final topPadding = screenHeight * 0.2;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) => Dialog(
+        insetPadding: EdgeInsets.only(top: topPadding),
+        child: AddEditPlaceScreen(
+          place: placeName,
+          isEditing: true,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      if (result == 'delete') {
+        _deletePlace(index);
+      } else {
+        _editPlace(index, result);
+      }
     }
   }
 }
