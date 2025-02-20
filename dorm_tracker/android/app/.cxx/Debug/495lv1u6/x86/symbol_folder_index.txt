@@ -1,1 +1,0 @@
-/home/david/Documents/CodingFiles/GitWorkspace/DormTracker/dorm_tracker/build/app/intermediates/cxx/Debug/495lv1u6/obj/x86
