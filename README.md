@@ -5,9 +5,9 @@ You can easily manage by first adding dorms, then specifying the places within e
 
 ## 📸 Screenshots
 
-![Screens](/imgs/1.pdf)
+![Screens](/imgs/1.png)
 
-![Screen Details](/imgs/2.pdf)
+![Screen Details](/imgs/2.png)
 
 ## 🛠️ How to Run the App
 
