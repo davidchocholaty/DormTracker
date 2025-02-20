@@ -1,0 +1,2 @@
+/home/david/Documents/CodingFiles/GitWorkspace/DormTracker/dorm_tracker/android/app/.cxx/Debug/495lv1u6/x86_64/CMakeFiles/edit_cache.dir
+/home/david/Documents/CodingFiles/GitWorkspace/DormTracker/dorm_tracker/android/app/.cxx/Debug/495lv1u6/x86_64/CMakeFiles/rebuild_cache.dir
